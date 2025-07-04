@@ -1,7 +1,24 @@
+import { useEffect } from "react";
 import { FaRegCreditCard } from "react-icons/fa";
 import { MdCheckCircle, MdError } from "react-icons/md";
 
-export default function ProcessingModal({ status = "processing", onClose }) {
+export default function ProcessingModal({
+  status = "processing",
+  errorMessage,
+  batteryInfo,
+  onClose,
+}) {
+  // ⏱️ Auto-close if it's the "no battery" error
+  useEffect(() => {
+    if (errorMessage === "No available battery ≥ 60%") {
+      const timer = setTimeout(() => {
+        onClose();
+      }, 2000); // 2 seconds
+
+      return () => clearTimeout(timer);
+    }
+  }, [errorMessage, onClose]);
+
   const renderContent = () => {
     if (status === "processing") {
       return (
@@ -19,23 +36,51 @@ export default function ProcessingModal({ status = "processing", onClose }) {
           </div>
         </>
       );
-    } else if (status === "success") {
+    }
+
+    if (status === "success") {
       return (
         <>
           <MdCheckCircle className="text-green-500 text-5xl mx-auto mb-3" />
           <h2 className="text-xl font-semibold text-green-600 mb-2">Success</h2>
-          <p className="text-gray-500 text-sm mb-4">Payment completed successfully!</p>
-        </>
-      );
-    } else {
-      return (
-        <>
-          <MdError className="text-red-500 text-5xl mx-auto mb-3" />
-          <h2 className="text-xl font-semibold text-red-600 mb-2">Payment Failed</h2>
-          <p className="text-gray-500 text-sm mb-4">Something went wrong. Try again.</p>
+          <p className="text-gray-500 text-sm mb-2">
+            Payment completed successfully!
+          </p>
+          {batteryInfo && (
+            <p className="text-gray-600 text-sm">
+              🔓 Battery <strong>{batteryInfo.battery_id}</strong> unlocked from Slot{" "}
+              <strong>{batteryInfo.slot_id}</strong>.
+            </p>
+          )}
         </>
       );
     }
+
+    if (errorMessage === "No available battery ≥ 60%") {
+      return (
+        <>
+          <MdError className="text-yellow-500 text-5xl mx-auto mb-3" />
+          <h2 className="text-xl font-semibold text-yellow-600 mb-2">
+            Ma jiro baytari diyaar ah
+          </h2>
+          <p className="text-gray-500 text-sm mb-4">
+            Waqtigan la joogo ma jiro powerbank buuxa oo diyaar ah. Fadlan isku day mar dambe.
+          </p>
+        </>
+      );
+    }
+
+    return (
+      <>
+        <MdError className="text-red-500 text-5xl mx-auto mb-3" />
+        <h2 className="text-xl font-semibold text-red-600 mb-2">
+          Payment Failed
+        </h2>
+        <p className="text-gray-500 text-sm mb-4">
+          {errorMessage || "Something went wrong. Try again."}
+        </p>
+      </>
+    );
   };
 
   return (
@@ -52,4 +97,3 @@ export default function ProcessingModal({ status = "processing", onClose }) {
     </div>
   );
 }
-// …………...processmodule
