@@ -4,9 +4,16 @@ const config = {
     "./index.html",
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
-  darkMode: "class",  // <--- Add this line to enable dark mode with 'class' strategy
+  darkMode: "class",
   theme: {
-    extend: {},
+    extend: {
+      fontSize: {
+        "xs-sm": "0.75rem",
+        "sm-md": "0.875rem",
+        "md-lg": "1rem",
+        "lg-xl": "1.25rem",
+      },
+    },
   },
   plugins: [],
 };
