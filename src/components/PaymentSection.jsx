@@ -16,10 +16,13 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
     const amount = parseFloat(selectedAmount.replace("$", ""));
 
     try {
-      const res = await axios.post("https://phasebackend-m7nn.onrender.com/api/pay/58", {
-        phoneNumber: number,
-        amount: amount,
-      });
+      const res = await axios.post(
+        "https://phase2backeend.onrender.com/api/pay/58",
+        {
+          phoneNumber: number,
+          amount: amount,
+        }
+      );
 
       console.log("Payment response:", res.data);
       setProcessingStatus("success");
@@ -213,4 +216,3 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
 
 export default PaymentSection;
 // This code is a React component for a payment section in a web application. It allows users
-
