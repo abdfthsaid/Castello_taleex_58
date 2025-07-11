@@ -17,7 +17,7 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
 
     try {
       const res = await axios.post(
-        "https://phase2backeend.onrender.com/api/pay/58",
+        "https://danabbackend.onrender.com/api/pay/58",
         {
           phoneNumber: number,
           amount: amount,
