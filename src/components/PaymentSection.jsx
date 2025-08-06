@@ -6,14 +6,19 @@ import ProcessingModal from "./ProcessingModal";
 const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
   const [showProcessing, setShowProcessing] = useState(false);
   const [processingStatus, setProcessingStatus] = useState("processing");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [reason, setReason] = useState("");
+  const [batteryInfo, setBatteryInfo] = useState(null);
+
   const [phone, setPhone] = useState("");
-  const [agree1, setAgree1] = useState(false);
-  const [agree2, setAgree2] = useState(false);
+  const [agree1, setAgree1] = useState(true);
+ 
   const [errors, setErrors] = useState({});
 
   const handlePayment = async () => {
     const number = phone;
     const amount = parseFloat(selectedAmount.replace("$", ""));
+    let isSuccess = false;
 
     try {
       const res = await axios.post(
@@ -21,28 +26,44 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
         {
           phoneNumber: number,
           amount: amount,
+        },
+        {
+          validateStatus: () => true, // Prevent axios from throwing error on 400/500
         }
       );
 
-      
-      setProcessingStatus("success");
+      const data = res.data;
 
+      if (res.status === 200 && data.success === true) {
+        setProcessingStatus("success");
+        setBatteryInfo({ battery_id: data.battery_id, slot_id: data.slot_id });
+        isSuccess = true;
+      } else if (data.success === false && data.reason === "no_battery") {
+        setProcessingStatus("failed");
+        setReason("no_battery");
+        setErrorMessage(data.message);
+      } else {
+        setProcessingStatus("failed");
+        setErrorMessage(data.message || "Payment not approved");
+      }
+    } catch (err) {
+      // Catch block will rarely be triggered now unless there is a network failure
+      setProcessingStatus("failed");
+      setErrorMessage("Network error, please try again.");
+    }
+
+    if (isSuccess) {
       setTimeout(() => {
+        setShowProcessing(false);
+        setProcessingStatus("processing");
+        setReason("");
+        setErrorMessage("");
+        setBatteryInfo(null);
         setPhone("");
         setAgree1(false);
-        setAgree2(false);
+      
         setErrors({});
         selectMethod(null);
-        setShowProcessing(false);
-        setProcessingStatus("processing");
-      }, 3000);
-    } catch (err) {
-    
-      setProcessingStatus("error");
-
-      setTimeout(() => {
-        setShowProcessing(false);
-        setProcessingStatus("processing");
       }, 3000);
     }
   };
@@ -57,25 +78,17 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
     if (!agree1) {
       newErrors.agree1 = "Fadlan ogolow shuruudaha koowaad";
     }
-    if (!agree2) {
-      newErrors.agree2 = "Fadlan ogolow shuruudaha labaad";
-    }
+  
     return newErrors;
   };
 
   const getplaceholders_Input = () => {
-    if (selectedMethod === "EVC Plus") {
-      return "61 xxxxx";
-    } else if (selectedMethod === "ZAAD") {
-      return "63 xxxxx";
-    } else if (selectedMethod === "SAHAL") {
-      return "37 xxxxx";
-    } else {
-      return "Telefoon Numberka"; // default placeholder if none selected
-    }
+    if (selectedMethod === "EVC Plus") return "61 xxxxx";
+    if (selectedMethod === "ZAAD") return "63 xxxxx";
+    if (selectedMethod === "SAHAL") return "37 xxxxx";
+    return "Telefoon Numberka";
   };
 
-  // console.log("Selected Method:", selectedMethod);
   const handlePay = () => {
     const validationErrors = validate();
     setErrors(validationErrors);
@@ -92,6 +105,9 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
       {showProcessing && (
         <ProcessingModal
           status={processingStatus}
+          errorMessage={errorMessage}
+          reason={reason}
+          batteryInfo={batteryInfo}
           onClose={() => setShowProcessing(false)}
         />
       )}
@@ -157,7 +173,7 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
           />
         </div>
         {errors.phone && (
-          <p className="ml-3 mt-1 text-xs text-red-500">{errors.phone}</p>
+          <p className="mt-1 ml-3 text-xs text-red-500">{errors.phone}</p>
         )}
         <label className="flex items-center mt-3 ml-3 mr-3 text-xs text-gray-600 dark:text-gray-400">
           Fadlan Gali Numberka lacagta la Dirayo
@@ -185,7 +201,7 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
         </div>
       </div>
 
-      <div className="flex items-start mt-5 ml-3 mr-3 space-x-2">
+      {/* <div className="flex items-start mt-5 ml-3 mr-3 space-x-2">
         <input
           type="checkbox"
           checked={agree2}
@@ -195,10 +211,10 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
         <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
           Qofkale shuruudaha iyo xeerarka isticmaala Danab
           {errors.agree2 && (
-            <p className="text-xs text-red-500 mt-1">{errors.agree2}</p>
+            <p className="mt-1 text-xs text-red-500">{errors.agree2}</p>
           )}
         </span>
-      </div>
+      </div> */}
 
       {/* Pay Button */}
       <div className="ml-3 mr-3">
@@ -215,4 +231,3 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
 };
 
 export default PaymentSection;
-// This code is a React component for a payment section in a web application. It allows users
