@@ -37,7 +37,7 @@ const TimeOptions = ({ selectedAmount, selectTime }) => {
         <h1 className="text-lg sm:text-xl font-extrabold leading-tight">
           Danab - Cafe Castello<br />Taleex-
         </h1>
-        <p className="text-xs sm:text-sm font-light">Dooro muddoada kugu habboon</p>
+        <p className="text-xs sm:text-sm font-light">Dooro Muddada kugu habboon</p>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-2 gap-3 mt-6 px-3">
