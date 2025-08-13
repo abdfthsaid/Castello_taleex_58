@@ -42,13 +42,22 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
         setProcessingStatus("failed");
         setReason("no_battery");
         setErrorMessage(data.message);
-      } else {
+      } else if (data.error) {
+        // Handle specific error codes from the API
         setProcessingStatus("failed");
-        setErrorMessage(data.message || "Payment not approved");
+        setReason(data.error.code);
+        setErrorMessage(data.error.message);
+        console.log(data.error.code);
+      } else {
+        // Fallback for other error cases
+        setProcessingStatus("failed");
+        setReason("unknown_error");
+        setErrorMessage(data.message || "Payment failed. Please try again.");
       }
     } catch (err) {
       // Catch block will rarely be triggered now unless there is a network failure
       setProcessingStatus("failed");
+      setReason("network_error");
       setErrorMessage("Network error, please try again.");
     }
 
