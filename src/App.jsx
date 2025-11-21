@@ -31,6 +31,12 @@ const WiFiPayment = () => {
             darkMode={darkMode}
           />
         </div>
+             <footer className="mt-6 text-center text-sm text-gray-600 dark:text-gray-300">
+          Call us any feedback or problem{" "}
+          <span className="font-semibold text-gray-800 dark:text-white">
+            616586503 / 616251068
+          </span>
+        </footer>
       </div>
     </div>
   );
