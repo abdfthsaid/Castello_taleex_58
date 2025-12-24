@@ -9,9 +9,14 @@ const ProcessingModal = ({
   batteryInfo,
   onClose,
 }) => {
-  // Auto-close for battery-related errors
+  // Auto-close for certain errors
   useEffect(() => {
-    if (reason === "NO_BATTERY_AVAILABLE" || reason === "no_battery") {
+    if (
+      reason === "NO_BATTERY_AVAILABLE" ||
+      reason === "no_battery" ||
+      reason === "timeout_error" ||
+      reason === "network_error"
+    ) {
       const timer = setTimeout(() => {
         onClose();
       }, 3000);

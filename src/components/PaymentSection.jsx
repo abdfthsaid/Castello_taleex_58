@@ -29,7 +29,7 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
         },
         {
           validateStatus: () => true,
-          timeout: 20000, // 20 second timeout
+          // No timeout - wait for response
         }
       );
 
