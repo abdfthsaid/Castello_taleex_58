@@ -21,6 +21,21 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
     let isSuccess = false;
 
     try {
+      // Check if phone number is blacklisted
+      const blacklistCheck = await axios.get(
+        `https://phase2backeend-ptsd.onrender.com/api/blacklist/check/${number}`,
+        { validateStatus: () => true }
+      );
+
+      if (blacklistCheck.data?.blacklisted) {
+        setProcessingStatus("failed");
+        setReason("BLACKLISTED");
+        setErrorMessage(
+          "Macamiil waxa kugu maqan battery hore fadlan soo celi midkaas"
+        );
+        return;
+      }
+
       const res = await axios.post(
         "https://phase2backeend-ptsd.onrender.com/api/pay/58",
         {
@@ -28,8 +43,7 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
           amount: amount,
         },
         {
-          validateStatus: () => true,
-          // No timeout - wait for response
+          validateStatus: () => true, // Prevent axios from throwing error on 400/500
         }
       );
 
@@ -39,13 +53,6 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
         setProcessingStatus("success");
         setBatteryInfo({ battery_id: data.battery_id, slot_id: data.slot_id });
         isSuccess = true;
-      } else if (res.status === 403) {
-        // Blacklisted user
-        setProcessingStatus("failed");
-        setReason("BLACKLISTED");
-        setErrorMessage(
-          "Macamiil waxa kugu maqan battery hore fadlan soo celi midkaas"
-        );
       } else if (data.success === false && data.reason === "no_battery") {
         setProcessingStatus("failed");
         setReason("no_battery");
@@ -63,14 +70,10 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
         setErrorMessage(data.message || "Payment failed. Please try again.");
       }
     } catch (err) {
+      // Catch block will rarely be triggered now unless there is a network failure
       setProcessingStatus("failed");
-      if (err.code === "ECONNABORTED") {
-        setReason("timeout_error");
-        setErrorMessage("Waqti badan ayey qaadatay, fadlan isku day mar kale.");
-      } else {
-        setReason("network_error");
-        setErrorMessage("Network error, fadlan isku day mar kale.");
-      }
+      setReason("network_error");
+      setErrorMessage("Network error, please try again.");
     }
 
     if (isSuccess) {
