@@ -40,6 +40,7 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
         setErrorMessage(
           "Macamiil waxa kugu maqan battery hore fadlan soo celi midkaas"
         );
+        setIsSubmitting(false); // 🛡️ Reset to allow retry
         return;
       }
 
@@ -70,6 +71,16 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
           setReason("NO_BATTERY_AVAILABLE");
           setErrorMessage(
             "Ma jiro baytari diyaar ah hadda, fadlan mar kale isku day"
+          );
+        } else if (errorMsg.includes("already have an active rental")) {
+          setReason("ALREADY_RENTED");
+          setErrorMessage(
+            "Waxaad hore u haysataa battery, fadlan soo celi midkaas ka hor intaadan mid kale kireysanin"
+          );
+        } else if (errorMsg.includes("battery is already rented")) {
+          setReason("BATTERY_TAKEN");
+          setErrorMessage(
+            "Battery-gan waa la kireystay, fadlan mar kale isku day"
           );
         } else if (errorMsg.includes("Payment not approved")) {
           setReason("PAYMENT_FAILED");
