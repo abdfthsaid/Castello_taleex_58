@@ -27,7 +27,7 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
         { validateStatus: () => true }
       );
 
-      if (blacklistCheck.data?.blacklisted) {
+      if (blacklistCheck.data?.isBlacklisted) {
         setProcessingStatus("failed");
         setReason("BLACKLISTED");
         setErrorMessage(
