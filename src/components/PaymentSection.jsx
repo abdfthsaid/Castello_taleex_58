@@ -53,21 +53,37 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
         setProcessingStatus("success");
         setBatteryInfo({ battery_id: data.battery_id, slot_id: data.slot_id });
         isSuccess = true;
-      } else if (data.success === false && data.reason === "no_battery") {
-        setProcessingStatus("failed");
-        setReason("no_battery");
-        setErrorMessage(data.message);
       } else if (data.error) {
-        // Handle specific error codes from the API
+        // Handle backend error messages
         setProcessingStatus("failed");
-        setReason(data.error.code);
-        setErrorMessage(data.error.message);
-        console.log(data.error.code);
+        const errorMsg = data.error;
+
+        // Detect specific error types from message
+        if (errorMsg.includes("No available battery")) {
+          setReason("NO_BATTERY_AVAILABLE");
+          setErrorMessage(
+            "Ma jiro baytari diyaar ah hadda, fadlan mar kale isku day"
+          );
+        } else if (errorMsg.includes("Payment not approved")) {
+          setReason("PAYMENT_FAILED");
+          setErrorMessage("Lacag bixinta ma dhicin, fadlan hubi numberkaaga");
+        } else if (
+          errorMsg.includes("blocked") ||
+          errorMsg.includes("blacklist")
+        ) {
+          setReason("BLACKLISTED");
+          setErrorMessage(
+            "Macamiil waxa kugu maqan battery hore fadlan soo celi midkaas"
+          );
+        } else {
+          setReason("PAYMENT_FAILED");
+          setErrorMessage(errorMsg);
+        }
       } else {
         // Fallback for other error cases
         setProcessingStatus("failed");
         setReason("unknown_error");
-        setErrorMessage(data.message || "Payment failed. Please try again.");
+        setErrorMessage("Khalad dhacay, fadlan mar kale isku day");
       }
     } catch (err) {
       // Catch block will rarely be triggered now unless there is a network failure
