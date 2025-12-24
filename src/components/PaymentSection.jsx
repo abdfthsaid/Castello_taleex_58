@@ -12,7 +12,7 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
 
   const [phone, setPhone] = useState("");
   const [agree1, setAgree1] = useState(true);
- 
+
   const [errors, setErrors] = useState({});
 
   const handlePayment = async () => {
@@ -21,6 +21,21 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
     let isSuccess = false;
 
     try {
+      // Check if phone number is blacklisted
+      const blacklistCheck = await axios.get(
+        `https://phase2backeend-ptsd.onrender.com/api/blacklist/check/${number}`,
+        { validateStatus: () => true }
+      );
+
+      if (blacklistCheck.data?.blacklisted) {
+        setProcessingStatus("failed");
+        setReason("BLACKLISTED");
+        setErrorMessage(
+          "Macamiil waxa kugu maqan battery hore fadlan soo celi midkaas"
+        );
+        return;
+      }
+
       const res = await axios.post(
         "https://phase2backeend-ptsd.onrender.com/api/pay/58",
         {
@@ -70,7 +85,7 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
         setBatteryInfo(null);
         setPhone("");
         setAgree1(false);
-      
+
         setErrors({});
         selectMethod(null);
       }, 3000);
@@ -87,7 +102,7 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
     if (!agree1) {
       newErrors.agree1 = "Fadlan ogolow shuruudaha koowaad";
     }
-  
+
     return newErrors;
   };
 

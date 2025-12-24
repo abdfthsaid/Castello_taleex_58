@@ -1,5 +1,3 @@
-
-
 import { useEffect } from "react";
 import { FaRegCreditCard } from "react-icons/fa";
 import { MdCheckCircle, MdError } from "react-icons/md";
@@ -25,30 +23,36 @@ const ProcessingModal = ({
   // Error display configuration
   const getErrorDisplay = () => {
     const apiMessage = errorMessage || "Something went wrong. Try again.";
-    
+
     const errorConfigs = {
       PAYMENT_FAILED: {
         title: "Lacag bixinta ma dhicin",
         iconColor: "text-red-500",
         titleColor: "text-red-600",
         bgColor: "bg-red-50",
-        borderColor: "border-red-200"
+        borderColor: "border-red-200",
       },
       NO_BATTERY_AVAILABLE: {
         title: "Ma jiro baytari diyaar ah",
         iconColor: "text-yellow-500",
         titleColor: "text-yellow-600",
         bgColor: "bg-yellow-50",
-        borderColor: "border-yellow-200"
+        borderColor: "border-yellow-200",
       },
-  
+      BLACKLISTED: {
+        title: "Digniin!",
+        iconColor: "text-orange-500",
+        titleColor: "text-orange-600",
+        bgColor: "bg-orange-50",
+        borderColor: "border-orange-200",
+      },
       network_error: {
         title: "Network Error",
         iconColor: "text-red-500",
         titleColor: "text-red-600",
         bgColor: "bg-red-50",
-        borderColor: "border-red-200"
-      }
+        borderColor: "border-red-200",
+      },
     };
 
     const config = errorConfigs[reason] || {
@@ -56,12 +60,12 @@ const ProcessingModal = ({
       iconColor: "text-red-500",
       titleColor: "text-red-600",
       bgColor: "bg-red-50",
-      borderColor: "border-red-200"
+      borderColor: "border-red-200",
     };
 
     return {
       ...config,
-      message: apiMessage
+      message: apiMessage,
     };
   };
 
@@ -91,8 +95,8 @@ const ProcessingModal = ({
       </p>
       {batteryInfo && (
         <p className="text-sm text-gray-600">
-          🔓 Battery <strong>{batteryInfo.battery_id}</strong> unlocked from Slot{" "}
-          <strong>{batteryInfo.slot_id}</strong>.
+          🔓 Battery <strong>{batteryInfo.battery_id}</strong> unlocked from
+          Slot <strong>{batteryInfo.slot_id}</strong>.
         </p>
       )}
     </>
@@ -100,14 +104,18 @@ const ProcessingModal = ({
 
   const renderErrorContent = () => {
     const errorDisplay = getErrorDisplay();
-    
+
     return (
       <>
-        <MdError className={`mx-auto mb-3 text-5xl ${errorDisplay.iconColor}`} />
+        <MdError
+          className={`mx-auto mb-3 text-5xl ${errorDisplay.iconColor}`}
+        />
         <h2 className={`mb-2 text-xl font-semibold ${errorDisplay.titleColor}`}>
           {errorDisplay.title}
         </h2>
-        <div className={`p-3 mb-4 text-sm text-gray-700 rounded-lg ${errorDisplay.bgColor} border ${errorDisplay.borderColor}`}>
+        <div
+          className={`p-3 mb-4 text-sm text-gray-700 rounded-lg ${errorDisplay.bgColor} border ${errorDisplay.borderColor}`}
+        >
           {errorDisplay.message}
         </div>
       </>
@@ -138,7 +146,7 @@ const ProcessingModal = ({
         >
           &times;
         </button>
-        
+
         {/* Modal Content */}
         {renderContent()}
       </div>
@@ -147,4 +155,3 @@ const ProcessingModal = ({
 };
 
 export default ProcessingModal;
-
