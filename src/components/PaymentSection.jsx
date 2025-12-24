@@ -9,6 +9,7 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
   const [errorMessage, setErrorMessage] = useState("");
   const [reason, setReason] = useState("");
   const [batteryInfo, setBatteryInfo] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false); // 🛡️ Prevent double-click
 
   const [phone, setPhone] = useState("");
   const [agree1, setAgree1] = useState(true);
@@ -16,6 +17,12 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
   const [errors, setErrors] = useState({});
 
   const handlePayment = async () => {
+    // 🛡️ PREVENT DOUBLE-CLICK
+    if (isSubmitting) {
+      console.log("⚠️ Payment already in progress, ignoring click");
+      return;
+    }
+    setIsSubmitting(true);
     const number = phone;
     const amount = parseFloat(selectedAmount.replace("$", ""));
     let isSuccess = false;
@@ -85,11 +92,16 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
         setReason("unknown_error");
         setErrorMessage("Khalad dhacay, fadlan mar kale isku day");
       }
+      // 🛡️ Reset isSubmitting for failed payments (allow retry)
+      if (!isSuccess) {
+        setIsSubmitting(false);
+      }
     } catch (err) {
       // Catch block will rarely be triggered now unless there is a network failure
       setProcessingStatus("failed");
       setReason("network_error");
       setErrorMessage("Network error, please try again.");
+      setIsSubmitting(false); // 🛡️ Reset on error
     }
 
     if (isSuccess) {
@@ -101,6 +113,7 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
         setBatteryInfo(null);
         setPhone("");
         setAgree1(false);
+        setIsSubmitting(false); // 🛡️ Reset on success
 
         setErrors({});
         selectMethod(null);
