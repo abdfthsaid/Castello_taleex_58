@@ -46,6 +46,13 @@ const ProcessingModal = ({
         bgColor: "bg-orange-50",
         borderColor: "border-orange-200",
       },
+      timeout_error: {
+        title: "Waqti Dheer",
+        iconColor: "text-yellow-500",
+        titleColor: "text-yellow-600",
+        bgColor: "bg-yellow-50",
+        borderColor: "border-yellow-200",
+      },
       network_error: {
         title: "Network Error",
         iconColor: "text-red-500",

@@ -28,7 +28,8 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
           amount: amount,
         },
         {
-          validateStatus: () => true, // Prevent axios from throwing error on 400/500
+          validateStatus: () => true,
+          timeout: 20000, // 20 second timeout
         }
       );
 
@@ -62,10 +63,14 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
         setErrorMessage(data.message || "Payment failed. Please try again.");
       }
     } catch (err) {
-      // Catch block will rarely be triggered now unless there is a network failure
       setProcessingStatus("failed");
-      setReason("network_error");
-      setErrorMessage("Network error, please try again.");
+      if (err.code === "ECONNABORTED") {
+        setReason("timeout_error");
+        setErrorMessage("Waqti badan ayey qaadatay, fadlan isku day mar kale.");
+      } else {
+        setReason("network_error");
+        setErrorMessage("Network error, fadlan isku day mar kale.");
+      }
     }
 
     if (isSuccess) {
