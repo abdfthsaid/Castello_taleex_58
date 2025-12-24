@@ -21,26 +21,6 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
     let isSuccess = false;
 
     try {
-      // Check if phone number is blacklisted (with 3s timeout)
-      try {
-        const blacklistCheck = await axios.get(
-          `https://phase2backeend-ptsd.onrender.com/api/blacklist/check/${number}`,
-          { validateStatus: () => true, timeout: 3000 }
-        );
-
-        if (blacklistCheck.data?.blacklisted) {
-          setProcessingStatus("failed");
-          setReason("BLACKLISTED");
-          setErrorMessage(
-            "Macamiil waxa kugu maqan battery hore fadlan soo celi midkaas"
-          );
-          return;
-        }
-      } catch (blacklistErr) {
-        // If blacklist check fails/times out, proceed with payment
-        console.log("Blacklist check skipped:", blacklistErr.message);
-      }
-
       const res = await axios.post(
         "https://phase2backeend-ptsd.onrender.com/api/pay/58",
         {
@@ -58,6 +38,13 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
         setProcessingStatus("success");
         setBatteryInfo({ battery_id: data.battery_id, slot_id: data.slot_id });
         isSuccess = true;
+      } else if (res.status === 403) {
+        // Blacklisted user
+        setProcessingStatus("failed");
+        setReason("BLACKLISTED");
+        setErrorMessage(
+          "Macamiil waxa kugu maqan battery hore fadlan soo celi midkaas"
+        );
       } else if (data.success === false && data.reason === "no_battery") {
         setProcessingStatus("failed");
         setReason("no_battery");
