@@ -31,14 +31,14 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
       // Check if phone number is blacklisted
       const blacklistCheck = await axios.get(
         `https://phase2backeend-ptsd.onrender.com/api/blacklist/check/${number}`,
-        { validateStatus: () => true }
+        { validateStatus: () => true },
       );
 
       if (blacklistCheck.data?.isBlacklisted) {
         setProcessingStatus("failed");
         setReason("BLACKLISTED");
         setErrorMessage(
-          "Macamiil waxa kugu maqan battery hore fadlan soo celi midkaas"
+          "Macamiil waxa kugu maqan battery hore fadlan soo celi midkaas",
         );
         setIsSubmitting(false); // 🛡️ Reset to allow retry
         return;
@@ -52,7 +52,7 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
         },
         {
           validateStatus: () => true, // Prevent axios from throwing error on 400/500
-        }
+        },
       );
 
       const data = res.data;
@@ -70,17 +70,17 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
         if (errorMsg.includes("No available battery")) {
           setReason("NO_BATTERY_AVAILABLE");
           setErrorMessage(
-            "Ma jiro baytari diyaar ah hadda, fadlan mar kale isku day"
+            "Ma jiro baytari diyaar ah hadda, fadlan mar kale isku day",
           );
         } else if (errorMsg.includes("already have an active rental")) {
           setReason("ALREADY_RENTED");
           setErrorMessage(
-            "Waxaad hore u haysataa battery, fadlan soo celi midkaas ka hor intaadan mid kale kireysanin"
+            "Waxaad hore u haysataa battery, fadlan soo celi midkaas ka hor intaadan mid kale kireysanin",
           );
         } else if (errorMsg.includes("battery is already rented")) {
           setReason("BATTERY_TAKEN");
           setErrorMessage(
-            "Battery-gan waa la kireystay, fadlan mar kale isku day"
+            "Battery-gan waa la kireystay, fadlan mar kale isku day",
           );
         } else if (errorMsg.includes("Payment not approved")) {
           setReason("PAYMENT_FAILED");
@@ -91,7 +91,7 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
         ) {
           setReason("BLACKLISTED");
           setErrorMessage(
-            "Macamiil waxa kugu maqan battery hore fadlan soo celi midkaas"
+            "Macamiil waxa kugu maqan battery hore fadlan soo celi midkaas",
           );
         } else {
           setReason("PAYMENT_FAILED");
@@ -245,24 +245,59 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
       </div>
 
       {/* Checkboxes */}
-      <div className="flex items-start mt-5 ml-3 mr-3 space-x-2">
-        <input
-          type="checkbox"
-          checked={agree1}
-          onChange={(e) => setAgree1(e.target.checked)}
-          className="w-4 h-4 mt-1"
-        />
-        <div className="flex flex-col">
-          <span className="text-gray-600 text-shadow-xs dark:text-gray-300">
-            Ogolow
-          </span>
-          <span className="text-xs font-bold text-pink-500 underline cursor-pointer">
-            shuruudaha iyo xeerarka isticmaalka Danab
-          </span>
-          {errors.agree1 && (
-            <p className="text-xs text-red-500">{errors.agree1}</p>
-          )}
+      <div className="mx-3 mt-5">
+        <div
+          onClick={() => setAgree1(!agree1)}
+          className={`flex items-center gap-3 p-3 transition-all duration-200 border-2 cursor-pointer rounded-xl ${
+            agree1
+              ? "border-pink-400 bg-gradient-to-r from-pink-50 to-purple-50 dark:from-pink-900/20 dark:to-purple-900/20 dark:border-pink-500"
+              : "border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-600 hover:border-pink-200 dark:hover:border-pink-700"
+          } ${errors.agree1 ? "border-red-400 dark:border-red-500" : ""}`}
+        >
+          {/* Custom Checkbox */}
+          <div
+            className={`flex items-center justify-center w-6 h-6 rounded-md border-2 transition-all duration-200 flex-shrink-0 ${
+              agree1
+                ? "bg-gradient-to-r from-pink-500 to-purple-500 border-pink-500"
+                : "border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-700"
+            }`}
+          >
+            {agree1 && (
+              <svg
+                className="w-4 h-4 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={3}
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            )}
+          </div>
+
+          {/* Label Content */}
+          <div className="flex flex-col">
+            <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+              Waan ogolahay
+            </span>
+            <a
+              href="/rules.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="text-xs font-medium text-pink-500 underline transition hover:text-pink-600 dark:text-pink-400 dark:hover:text-pink-300 decoration-dotted underline-offset-2"
+            >
+              📜 Shuruudaha iyo xeerarka isticmaalka Danab
+            </a>
+          </div>
         </div>
+        {errors.agree1 && (
+          <p className="mt-1 ml-1 text-xs text-red-500">{errors.agree1}</p>
+        )}
       </div>
 
       {/* <div className="flex items-start mt-5 ml-3 mr-3 space-x-2">
