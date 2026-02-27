@@ -66,6 +66,11 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
           setErrorMessage(
             "Battery-gan waa la kireystay, fadlan mar kale isku day",
           );
+        } else if (errorMsg.includes("blocked from renting")) {
+          setReason("BLACKLISTED");
+          setErrorMessage(
+            "Waa lagaa mamnuucay kireysiga. Fadlan la xiriir taageerada.",
+          );
         } else if (errorMsg.includes("Payment not approved")) {
           setReason("PAYMENT_FAILED");
           setErrorMessage("Lacag bixinta ma dhicin, fadlan hubi numberkaaga");
