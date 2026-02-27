@@ -28,24 +28,8 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
     let isSuccess = false;
 
     try {
-      // Check if phone number is blacklisted
-      const blacklistCheck = await axios.get(
-        `https://phase2backeend-ptsd.onrender.com/api/blacklist/check/${number}`,
-        { validateStatus: () => true },
-      );
-
-      if (blacklistCheck.data?.isBlacklisted) {
-        setProcessingStatus("failed");
-        setReason("BLACKLISTED");
-        setErrorMessage(
-          "Macamiil waxa kugu maqan battery hore fadlan soo celi midkaas",
-        );
-        setIsSubmitting(false); // 🛡️ Reset to allow retry
-        return;
-      }
-
       const res = await axios.post(
-        "https://phase2backeend-ptsd.onrender.com/api/pay/58",
+        "https://phase2backeend-1.onrender.com/api/pay/58",
         {
           phoneNumber: number,
           amount: amount,
@@ -85,14 +69,6 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
         } else if (errorMsg.includes("Payment not approved")) {
           setReason("PAYMENT_FAILED");
           setErrorMessage("Lacag bixinta ma dhicin, fadlan hubi numberkaaga");
-        } else if (
-          errorMsg.includes("blocked") ||
-          errorMsg.includes("blacklist")
-        ) {
-          setReason("BLACKLISTED");
-          setErrorMessage(
-            "Macamiil waxa kugu maqan battery hore fadlan soo celi midkaas",
-          );
         } else {
           setReason("PAYMENT_FAILED");
           setErrorMessage(errorMsg);
