@@ -10,6 +10,8 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
   const [reason, setReason] = useState("");
   const [batteryInfo, setBatteryInfo] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false); // 🛡️ Prevent double-click
+  const [statusMessage, setStatusMessage] = useState(""); // Progress message
+  const [waafiMessage, setWaafiMessage] = useState(""); // Waafi confirmation
 
   const [phone, setPhone] = useState("");
   const [agree1, setAgree1] = useState(true);
@@ -28,8 +30,27 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
     let isSuccess = false;
 
     try {
+      // Step 1: Check blacklist
+      setStatusMessage("Hubinaya macluumaadka..."); // Checking information
+      const blacklistCheck = await axios.get(
+        `https://usersbackend-nxjy.onrender.com/api/blacklist/check/${number}`,
+        { validateStatus: () => true },
+      );
+
+      if (blacklistCheck.data?.blacklisted) {
+        setProcessingStatus("failed");
+        setReason("BLACKLISTED");
+        setErrorMessage(
+          "Macamiil waxa kugu maqan battery hore fadlan soo celi midkaas",
+        );
+        setIsSubmitting(false); // 🛡️ Reset to allow retry
+        return;
+      }
+
+      // Step 2: Process payment
+      setStatusMessage("Diraya lacagta... Fadlan sug"); // Sending payment... Please wait
       const res = await axios.post(
-        "https://phase2backeend-1.onrender.com/api/pay/58",
+        "https://usersbackend-nxjy.onrender.com/api/pay/58",
         {
           phoneNumber: number,
           amount: amount,
@@ -44,6 +65,8 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
       if (res.status === 200 && data.success === true) {
         setProcessingStatus("success");
         setBatteryInfo({ battery_id: data.battery_id, slot_id: data.slot_id });
+        setWaafiMessage(data.waafiMessage || "Lacag bixinta waa guulaysatay!"); // Payment successful!
+        setStatusMessage("");
         isSuccess = true;
       } else if (data.error) {
         // Handle backend error messages
@@ -74,6 +97,14 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
         } else if (errorMsg.includes("Payment not approved")) {
           setReason("PAYMENT_FAILED");
           setErrorMessage("Lacag bixinta ma dhicin, fadlan hubi numberkaaga");
+        } else if (
+          errorMsg.includes("blocked") ||
+          errorMsg.includes("blacklist")
+        ) {
+          setReason("BLACKLISTED");
+          setErrorMessage(
+            "Macamiil waxa kugu maqan battery hore fadlan soo celi midkaas",
+          );
         } else {
           setReason("PAYMENT_FAILED");
           setErrorMessage(errorMsg);
@@ -93,7 +124,7 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
       setProcessingStatus("failed");
       setReason("network_error");
       setErrorMessage("Network error, please try again.");
-      setIsSubmitting(false); // 🛡️ Reset on error
+      setIsSubmitting(false); // Reset on error
     }
 
     if (isSuccess) {
@@ -103,13 +134,15 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
         setReason("");
         setErrorMessage("");
         setBatteryInfo(null);
+        setWaafiMessage("");
+        setStatusMessage("");
         setPhone("");
         setAgree1(false);
-        setIsSubmitting(false); // 🛡️ Reset on success
+        setIsSubmitting(false); // Reset on success
 
         setErrors({});
         selectMethod(null);
-      }, 3000);
+      }, 5000);
     }
   };
 
@@ -153,6 +186,8 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
           errorMessage={errorMessage}
           reason={reason}
           batteryInfo={batteryInfo}
+          statusMessage={statusMessage}
+          waafiMessage={waafiMessage}
           onClose={() => setShowProcessing(false)}
         />
       )}

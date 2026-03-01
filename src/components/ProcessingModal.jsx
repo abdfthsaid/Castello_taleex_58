@@ -7,6 +7,8 @@ const ProcessingModal = ({
   errorMessage,
   reason,
   batteryInfo,
+  statusMessage,
+  waafiMessage,
   onClose,
 }) => {
   // Auto-close for battery-related errors
@@ -75,8 +77,13 @@ const ProcessingModal = ({
       <h2 className="mb-2 text-xl font-semibold text-gray-800">
         Processing Payment
       </h2>
+      {statusMessage && (
+        <p className="mb-4 text-sm font-medium text-purple-600">
+          {statusMessage}
+        </p>
+      )}
       <p className="mb-6 text-sm text-gray-400">
-        Please wait while we process your payment...
+        Fadlan sug inta aan lacagta ku dirno...
       </p>
       <div className="flex items-center justify-center">
         <div className="w-16 h-16 border-4 border-purple-500 rounded-full animate-spin border-t-transparent">
@@ -89,14 +96,19 @@ const ProcessingModal = ({
   const renderSuccessContent = () => (
     <>
       <MdCheckCircle className="mx-auto mb-3 text-5xl text-green-500" />
-      <h2 className="mb-2 text-xl font-semibold text-green-600">Success</h2>
+      <h2 className="mb-2 text-xl font-semibold text-green-600">Guul!</h2>
+      {waafiMessage && (
+        <div className="p-3 mb-3 text-sm font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg">
+          ✅ {waafiMessage}
+        </div>
+      )}
       <p className="mb-2 text-sm text-gray-500">
-        Payment completed successfully!
+        Lacag bixinta waa guulaysatay!
       </p>
       {batteryInfo && (
         <p className="text-sm text-gray-600">
-          🔓 Battery <strong>{batteryInfo.battery_id}</strong> unlocked from
-          Slot <strong>{batteryInfo.slot_id}</strong>.
+          🔓 Battery <strong>{batteryInfo.battery_id}</strong> waa la furay Slot{" "}
+          <strong>{batteryInfo.slot_id}</strong>.
         </p>
       )}
     </>
