@@ -1,12 +1,11 @@
 import React, { useState } from "react";
+import { Routes, Route } from "react-router-dom";
 import HeaderSection from "./components/HeaderSection ";
 import TimeOptions from "./components/TimeOptions";
 import PaymentSection from "./components/PaymentSection";
+import PaymentProcessing from "./pages/PaymentProcessing";
 
-// funtion payment
-import axios from "axios";
-
-const WiFiPayment = () => {
+const HomePage = () => {
   const [darkMode, setDarkMode] = useState(false);
   const [selectedAmount, setSelectedAmount] = useState("$0.50");
   const [selectedMethod, setSelectedMethod] = useState("EVC Plus");
@@ -31,7 +30,7 @@ const WiFiPayment = () => {
             darkMode={darkMode}
           />
         </div>
-             <footer className="mt-6 text-center text-sm text-gray-600 dark:text-gray-300">
+        <footer className="mt-6 text-center text-sm text-gray-600 dark:text-gray-300">
           Call us any feedback or problem{" "}
           <span className="font-semibold text-gray-800 dark:text-white">
             616586503 / 616251068
@@ -39,6 +38,15 @@ const WiFiPayment = () => {
         </footer>
       </div>
     </div>
+  );
+};
+
+const WiFiPayment = () => {
+  return (
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/payment-processing" element={<PaymentProcessing />} />
+    </Routes>
   );
 };
 

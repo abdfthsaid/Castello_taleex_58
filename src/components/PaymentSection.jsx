@@ -1,149 +1,23 @@
-import axios from "axios";
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { FaLongArrowAltRight } from "react-icons/fa";
-import ProcessingModal from "./ProcessingModal";
 
 const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
-  const [showProcessing, setShowProcessing] = useState(false);
-  const [processingStatus, setProcessingStatus] = useState("processing");
-  const [errorMessage, setErrorMessage] = useState("");
-  const [reason, setReason] = useState("");
-  const [batteryInfo, setBatteryInfo] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false); // 🛡️ Prevent double-click
-  const [statusMessage, setStatusMessage] = useState(""); // Progress message
-  const [waafiMessage, setWaafiMessage] = useState(""); // Waafi confirmation
+  const navigate = useNavigate();
 
   const [phone, setPhone] = useState("");
   const [agree1, setAgree1] = useState(true);
-
   const [errors, setErrors] = useState({});
 
-  const handlePayment = async () => {
-    // 🛡️ PREVENT DOUBLE-CLICK
-    if (isSubmitting) {
-      console.log("⚠️ Payment already in progress, ignoring click");
-      return;
-    }
-    setIsSubmitting(true);
-    const number = phone;
-    const amount = parseFloat(selectedAmount.replace("$", ""));
-    let isSuccess = false;
-
-    try {
-      // Step 1: Check blacklist
-      setStatusMessage("Hubinaya macluumaadka..."); // Checking information
-      const blacklistCheck = await axios.get(
-        `https://usersbackend-nxjy.onrender.com/api/blacklist/check/${number}`,
-        { validateStatus: () => true },
-      );
-
-      if (blacklistCheck.data?.blacklisted) {
-        setProcessingStatus("failed");
-        setReason("BLACKLISTED");
-        setErrorMessage(
-          "Macamiil waxa kugu maqan battery hore fadlan soo celi midkaas",
-        );
-        setIsSubmitting(false); // 🛡️ Reset to allow retry
-        return;
-      }
-
-      // Step 2: Process payment
-      setStatusMessage("Diraya lacagta... Fadlan sug"); // Sending payment... Please wait
-      const res = await axios.post(
-        "https://usersbackend-nxjy.onrender.com/api/pay/58",
-        {
-          phoneNumber: number,
-          amount: amount,
-        },
-        {
-          validateStatus: () => true, // Prevent axios from throwing error on 400/500
-        },
-      );
-
-      const data = res.data;
-
-      if (res.status === 200 && data.success === true) {
-        setProcessingStatus("success");
-        setBatteryInfo({ battery_id: data.battery_id, slot_id: data.slot_id });
-        setWaafiMessage(data.waafiMessage || "Lacag bixinta waa guulaysatay!"); // Payment successful!
-        setStatusMessage("");
-        isSuccess = true;
-      } else if (data.error) {
-        // Handle backend error messages
-        setProcessingStatus("failed");
-        const errorMsg = data.error;
-
-        // Detect specific error types from message
-        if (errorMsg.includes("No available battery")) {
-          setReason("NO_BATTERY_AVAILABLE");
-          setErrorMessage(
-            "Ma jiro baytari diyaar ah hadda, fadlan mar kale isku day",
-          );
-        } else if (errorMsg.includes("already have an active rental")) {
-          setReason("ALREADY_RENTED");
-          setErrorMessage(
-            "Waxaad hore u haysataa battery, fadlan soo celi midkaas ka hor intaadan mid kale kireysanin",
-          );
-        } else if (errorMsg.includes("battery is already rented")) {
-          setReason("BATTERY_TAKEN");
-          setErrorMessage(
-            "Battery-gan waa la kireystay, fadlan mar kale isku day",
-          );
-        } else if (errorMsg.includes("blocked from renting")) {
-          setReason("BLACKLISTED");
-          setErrorMessage(
-            "Waa lagaa mamnuucay kireysiga. Fadlan la xiriir taageerada.",
-          );
-        } else if (errorMsg.includes("Payment not approved")) {
-          setReason("PAYMENT_FAILED");
-          setErrorMessage("Lacag bixinta ma dhicin, fadlan hubi numberkaaga");
-        } else if (
-          errorMsg.includes("blocked") ||
-          errorMsg.includes("blacklist")
-        ) {
-          setReason("BLACKLISTED");
-          setErrorMessage(
-            "Macamiil waxa kugu maqan battery hore fadlan soo celi midkaas",
-          );
-        } else {
-          setReason("PAYMENT_FAILED");
-          setErrorMessage(errorMsg);
-        }
-      } else {
-        // Fallback for other error cases
-        setProcessingStatus("failed");
-        setReason("unknown_error");
-        setErrorMessage("Khalad dhacay, fadlan mar kale isku day");
-      }
-      // 🛡️ Reset isSubmitting for failed payments (allow retry)
-      if (!isSuccess) {
-        setIsSubmitting(false);
-      }
-    } catch (err) {
-      // Catch block will rarely be triggered now unless there is a network failure
-      setProcessingStatus("failed");
-      setReason("network_error");
-      setErrorMessage("Network error, please try again.");
-      setIsSubmitting(false); // Reset on error
-    }
-
-    if (isSuccess) {
-      setTimeout(() => {
-        setShowProcessing(false);
-        setProcessingStatus("processing");
-        setReason("");
-        setErrorMessage("");
-        setBatteryInfo(null);
-        setWaafiMessage("");
-        setStatusMessage("");
-        setPhone("");
-        setAgree1(false);
-        setIsSubmitting(false); // Reset on success
-
-        setErrors({});
-        selectMethod(null);
-      }, 5000);
-    }
+  const handlePayment = () => {
+    // Navigate to payment processing page with payment data
+    navigate("/payment-processing", {
+      state: {
+        phone: phone,
+        amount: selectedAmount,
+        paymentMethod: selectedMethod,
+      },
+    });
   };
 
   const isActiveMethod = (method) => selectedMethod === method;
@@ -172,26 +46,12 @@ const PaymentSection = ({ selectedAmount, selectedMethod, selectMethod }) => {
     setErrors(validationErrors);
 
     if (Object.keys(validationErrors).length === 0) {
-      setShowProcessing(true);
-      setProcessingStatus("processing");
       handlePayment();
     }
   };
 
   return (
     <>
-      {showProcessing && (
-        <ProcessingModal
-          status={processingStatus}
-          errorMessage={errorMessage}
-          reason={reason}
-          batteryInfo={batteryInfo}
-          statusMessage={statusMessage}
-          waafiMessage={waafiMessage}
-          onClose={() => setShowProcessing(false)}
-        />
-      )}
-
       {/* Amount to Pay */}
       <div className="py-4 mt-6 ml-3 mr-3 text-center bg-purple-200 shadow rounded-xl dark:bg-purple-800">
         <p className="text-lg font-semibold text-purple-800 dark:text-purple-200">
